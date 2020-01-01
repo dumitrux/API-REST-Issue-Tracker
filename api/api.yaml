@@ -1,0 +1,1175 @@
+swagger: '2.0'
+info:
+  description: REST API Issue Tracker documentation - Grup 13 D
+  version: '1.0'
+  title: REST API Issue Tracker
+  contact:
+    name: Sourcer(Bitbucket)
+    url: 'https://bitbucket.org/ademait/aswg13drest/src/master/'
+host: grup13aswd-rest-api-blabla.herokuapp.com
+basePath: /
+tags:
+  - name: Attachment
+    description: Attachment Controller
+  - name: Issues
+    description: Issue Controller
+  - name: User
+    description: User Controller
+paths:
+  '/api/v1/attachments/{id}':
+    get:
+      tags:
+        - Attachment
+      summary: Busca el attachment per id
+      description: Busca el attachment amb el id especificat
+      operationId: getAttachmentByIdUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: id
+          in: path
+          description: id
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Resource'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+  /api/v1/issues:
+    get:
+      tags:
+        - Issues
+      summary: Busca totes les issues
+      description: Retorna totes les issues creades fins ara
+      operationId: getAllIssuesUsingGET
+      produces:
+        - '*/*'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Issue'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+    post:
+      tags:
+        - Issues
+      summary: Crea una issue
+      description: Es crea una issue amb la informacio enviada pel body i parametres
+      operationId: addIssueUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - in: body
+          name: issueDTO
+          description: issueDTO
+          required: true
+          schema:
+            $ref: '#/definitions/IssueDTO'
+        - name: kind
+          in: query
+          description: Tipus que es vol assignar a la issue
+          required: false
+          type: string
+          default: BUG
+          allowEmptyValue: false
+          enum:
+            - BUG
+            - ENHANCEMENT
+            - PROPOSAL
+            - TASK
+        - name: priority
+          in: query
+          description: prioritat que es vol assignar a la issue
+          required: false
+          type: string
+          default: MAJOR
+          allowEmptyValue: false
+          enum:
+            - TRIVIAL
+            - MINOR
+            - MAJOR
+            - CRITICAL
+            - BLOCKER
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/Issue'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+  /api/v1/issues/kind:
+    get:
+      tags:
+        - Issues
+      summary: Busca totes les Issues amb un tipus concret
+      description: Donat un tipus busca les issues que tenen aquell tipus assignat
+      operationId: getIssuesByKindUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: issueType
+          in: query
+          description: Valor del tipus que vols consultar
+          required: true
+          type: string
+          allowEmptyValue: false
+          enum:
+            - BUG
+            - ENHANCEMENT
+            - PROPOSAL
+            - TASK
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Issue'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+  /api/v1/issues/priority:
+    get:
+      tags:
+        - Issues
+      summary: Busca totes les Issues amb una prioritat concreta
+      description: Donat una prioritat busca les issues que tenen aquella prioritat assignada
+      operationId: getIssuesByPriorityUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: priority
+          in: query
+          description: Valor de la prioritat que vols consultar
+          required: true
+          type: string
+          allowEmptyValue: false
+          enum:
+            - TRIVIAL
+            - MINOR
+            - MAJOR
+            - CRITICAL
+            - BLOCKER
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Issue'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+  /api/v1/issues/status:
+    get:
+      tags:
+        - Issues
+      summary: Busca totes les Issues amb un status concret
+      description: Donat un status busca les issues que tenen aquell estatus assignat
+      operationId: getIssuesByStatusUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: status
+          in: query
+          description: Valor del status que vols consultar
+          required: true
+          type: string
+          allowEmptyValue: false
+          enum:
+            - OPEN
+            - ONHOLD
+            - RESOLVED
+            - DUPLICATE
+            - INVALID
+            - WONTFIX
+            - CLOSED
+            - NEW
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Issue'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+  /api/v1/issues/votes:
+    get:
+      tags:
+        - Issues
+      summary: Reordena totes les Issues per l'atribut votes
+      description: 'Donat l''ordre en que es vol ordenar, les issues s''ordenaran de forma ascendent o descendent'
+      operationId: getIssuesByOrderByVotesUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: orderby
+          in: query
+          description: Ordre pel qual vols ordenar les issues
+          required: true
+          type: string
+          allowEmptyValue: false
+          enum:
+            - ASCENDENT
+            - DESCENDENT
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Issue'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+  /api/v1/issues/watchers:
+    get:
+      tags:
+        - Issues
+      summary: Reordena totes les Issues per l'atribut watchers
+      description: 'Donat l''ordre en que es vol ordenar, les issues s''ordenaran de forma ascendent o descendent'
+      operationId: getIssuesByOrderByWatchersUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: orderby
+          in: query
+          description: Ordre pel qual vols ordenar les issues
+          required: true
+          type: string
+          allowEmptyValue: false
+          enum:
+            - ASCENDENT
+            - DESCENDENT
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Issue'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+  '/api/v1/issues/{id}':
+    get:
+      tags:
+        - Issues
+      summary: Busca Issue per id
+      description: Donat un id busca el issue en concret
+      operationId: getIssueByIdUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: id
+          in: path
+          description: Valor del id pel Issue que vols
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Issue'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+    put:
+      tags:
+        - Issues
+      summary: Actualitza una issue
+      description: 'S''actuallitza la issue amb el id especificat, la informacio enviada pel body i parametres'
+      operationId: updateIssueUsingPUT
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - name: id
+          in: path
+          description: id
+          required: true
+          type: integer
+          format: int64
+        - in: body
+          name: issueDetails
+          description: issueDetails
+          required: true
+          schema:
+            $ref: '#/definitions/IssueDTO'
+        - name: kind
+          in: query
+          description: kind
+          required: false
+          type: string
+          enum:
+            - BUG
+            - ENHANCEMENT
+            - PROPOSAL
+            - TASK
+        - name: priority
+          in: query
+          description: priority
+          required: false
+          type: string
+          enum:
+            - TRIVIAL
+            - MINOR
+            - MAJOR
+            - CRITICAL
+            - BLOCKER
+        - name: status
+          in: query
+          description: status
+          required: false
+          type: string
+          enum:
+            - OPEN
+            - ONHOLD
+            - RESOLVED
+            - DUPLICATE
+            - INVALID
+            - WONTFIX
+            - CLOSED
+            - NEW
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Issue'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+    delete:
+      tags:
+        - Issues
+      summary: Borra una issue
+      description: Borra la issue amb el id passat per parametre
+      operationId: deleteIssueUsingDELETE
+      produces:
+        - '*/*'
+      parameters:
+        - name: id
+          in: path
+          description: id
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+        - JWT: []
+      deprecated: false
+  '/api/v1/issues/{id}/attachments':
+    get:
+      tags:
+        - Issues
+      summary: Busca tots els attachments d'una issue
+      description: 'Donat el id de la issue, es busquen tots els attachments que te'
+      operationId: getAllIssueAttachmentsUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: id
+          in: path
+          description: id
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Attachment'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+    post:
+      tags:
+        - Issues
+      summary: Afegir un attachment a una issue
+      description: 'Donat el id de la issue i el fitxer que se li vol assignar, s''assigna el fitxer a la issue'
+      operationId: addAttachmentIssueUsingPOST
+      consumes:
+        - multipart/form-data
+      produces:
+        - '*/*'
+      parameters:
+        - name: Attachment
+          in: formData
+          description: Fitxer que es vol assignar a la issue
+          required: true
+          type: file
+        - name: id
+          in: path
+          description: id
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Issue'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+  '/api/v1/issues/{id}/comments':
+    get:
+      tags:
+        - Issues
+      summary: Busca tots els comentaris d'una issue
+      description: Busca tots els comentaris de la issue amb el id especificat
+      operationId: getAllCommentsUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: id
+          in: path
+          description: id
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Comment'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+    post:
+      tags:
+        - Issues
+      summary: Afegeix un comentari a una issue
+      description: S'afegeix un comentari a la issue amb el id espesificat
+      operationId: addCommentUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - in: body
+          name: commentDTO
+          description: commentDTO
+          required: true
+          schema:
+            $ref: '#/definitions/CommentDTO'
+        - name: id
+          in: path
+          description: id
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/Comment'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+  '/api/v1/issues/{id}/comments/{commentId}':
+    put:
+      tags:
+        - Issues
+      summary: Actualitza/Edita un comentari
+      description: 'El comentari de la issue especificada amb el id, es caniva amb la nova informacio aportada'
+      operationId: updateCommentUsingPUT
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - in: body
+          name: commentDTO
+          description: commentDTO
+          required: true
+          schema:
+            $ref: '#/definitions/CommentDTO'
+        - name: commentId
+          in: path
+          description: commentId
+          required: true
+          type: integer
+          format: int64
+        - name: id
+          in: path
+          description: id
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Comment'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+    delete:
+      tags:
+        - Issues
+      summary: Borra el comentari d'una issue
+      description: Elimina el comentari de la issue identificada amb el id especificat
+      operationId: deleteCommentUsingDELETE
+      produces:
+        - '*/*'
+      parameters:
+        - name: commentId
+          in: path
+          description: commentId
+          required: true
+          type: integer
+          format: int64
+        - name: id
+          in: path
+          description: id
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+        - JWT: []
+      deprecated: false
+  '/api/v1/issues/{id}/vote':
+    post:
+      tags:
+        - Issues
+      summary: Votar a una issue
+      description: Donat el id de la issue es crea un vot de l'usuari a aquella issue
+      operationId: voteIssueUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - name: id
+          in: path
+          description: id
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+    delete:
+      tags:
+        - Issues
+      summary: Desfer un vot a una issue
+      description: Donat el id de la issue es borra el vot de l'usuari a aquella issue
+      operationId: unVoteIssueUsingDELETE
+      produces:
+        - '*/*'
+      parameters:
+        - name: id
+          in: path
+          description: id
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+        - JWT: []
+      deprecated: false
+  '/api/v1/issues/{id}/watch':
+    post:
+      tags:
+        - Issues
+      summary: Començar a fer Watching a una issue
+      description: Donat el id de la issue es crea un watcher de l'usuari a aquella issue
+      operationId: watchIssueUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - name: id
+          in: path
+          description: id
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+    delete:
+      tags:
+        - Issues
+      summary: Desfer el Watching a una issue
+      description: Donat el id de la issue es borra el watcher de l'usuari a aquella issue
+      operationId: unWatchIssueUsingDELETE
+      produces:
+        - '*/*'
+      parameters:
+        - name: id
+          in: path
+          description: id
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+        - JWT: []
+      deprecated: false
+  /api/v1/users:
+    get:
+      tags:
+        - User
+      summary: Busca tots els usuaris
+      description: Busca tots els usuaris creats fins al moment
+      operationId: getAllUsersUsingGET
+      produces:
+        - '*/*'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+    post:
+      tags:
+        - User
+      summary: Crea un usuari
+      description: crea un usuari amb les dades especificades
+      operationId: addUserUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - in: body
+          name: userDTO
+          description: userDTO
+          required: true
+          schema:
+            $ref: '#/definitions/UserDTO'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/User'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+  /api/v1/users/apikey:
+    get:
+      tags:
+        - User
+      summary: Demana la Api-Key del usuari amb aquest username
+      description: retorna la api-key del usuari amb aquest username
+      operationId: getUserApiKeyUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: username
+          in: query
+          description: username
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/User'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+  /api/v1/users/username:
+    get:
+      tags:
+        - User
+      summary: Busca un usuari pel username
+      description: Busca l'usuari amb el username especificat
+      operationId: getUserByUsernameUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: username
+          in: query
+          description: username
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/User'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+  '/api/v1/users/{id}':
+    get:
+      tags:
+        - User
+      summary: Busca un usuari per id
+      description: Busca l'usuari amb el id especificat
+      operationId: getUserByIdUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: id
+          in: path
+          description: id
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/User'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT: []
+      deprecated: false
+securityDefinitions:
+  JWT:
+    type: apiKey
+    name: Authorization
+    in: header
+definitions:
+  Attachment:
+    type: object
+    properties:
+      dirtyName:
+        type: string
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      type:
+        type: string
+    title: Attachment
+  Comment:
+    type: object
+    properties:
+      body:
+        type: string
+      createdAt:
+        type: string
+        format: date-time
+      creator:
+        $ref: '#/definitions/User'
+      id:
+        type: integer
+        format: int64
+      updatedAt:
+        type: string
+        format: date-time
+    title: Comment
+  CommentDTO:
+    type: object
+    properties:
+      body:
+        type: string
+    title: CommentDTO
+  File:
+    type: object
+    properties:
+      absolute:
+        type: boolean
+      absoluteFile:
+        $ref: '#/definitions/File'
+      absolutePath:
+        type: string
+      canonicalFile:
+        $ref: '#/definitions/File'
+      canonicalPath:
+        type: string
+      directory:
+        type: boolean
+      file:
+        type: boolean
+      freeSpace:
+        type: integer
+        format: int64
+      hidden:
+        type: boolean
+      name:
+        type: string
+      parent:
+        type: string
+      parentFile:
+        $ref: '#/definitions/File'
+      path:
+        type: string
+      totalSpace:
+        type: integer
+        format: int64
+      usableSpace:
+        type: integer
+        format: int64
+    title: File
+  InputStream:
+    type: object
+    title: InputStream
+  Issue:
+    type: object
+    properties:
+      assignee:
+        $ref: '#/definitions/User'
+      attachmentList:
+        type: array
+        items:
+          $ref: '#/definitions/Attachment'
+      createdAt:
+        type: string
+        format: date-time
+      creator:
+        $ref: '#/definitions/User'
+      description:
+        type: string
+      id:
+        type: integer
+        format: int64
+        description: L'identificador dels issues
+      issueType:
+        type: string
+        enum:
+          - BUG
+          - ENHANCEMENT
+          - PROPOSAL
+          - TASK
+      priority:
+        type: string
+        enum:
+          - TRIVIAL
+          - MINOR
+          - MAJOR
+          - CRITICAL
+          - BLOCKER
+      status:
+        type: string
+        enum:
+          - OPEN
+          - ONHOLD
+          - RESOLVED
+          - DUPLICATE
+          - INVALID
+          - WONTFIX
+          - CLOSED
+          - NEW
+      title:
+        type: string
+      updatedAt:
+        type: string
+        format: date-time
+      votes:
+        type: integer
+        format: int32
+      watchers:
+        type: integer
+        format: int32
+    title: Issue
+    description: Detalls sobre els issues
+  IssueDTO:
+    type: object
+    properties:
+      assignee:
+        type: string
+      description:
+        type: string
+      title:
+        type: string
+    title: IssueDTO
+  Resource:
+    type: object
+    properties:
+      description:
+        type: string
+      file:
+        $ref: '#/definitions/File'
+      filename:
+        type: string
+      inputStream:
+        $ref: '#/definitions/InputStream'
+      open:
+        type: boolean
+      readable:
+        type: boolean
+      uri:
+        $ref: '#/definitions/URI'
+      url:
+        $ref: '#/definitions/URL'
+    title: Resource
+  URI:
+    type: object
+    properties:
+      absolute:
+        type: boolean
+      authority:
+        type: string
+      fragment:
+        type: string
+      host:
+        type: string
+      opaque:
+        type: boolean
+      path:
+        type: string
+      port:
+        type: integer
+        format: int32
+      query:
+        type: string
+      rawAuthority:
+        type: string
+      rawFragment:
+        type: string
+      rawPath:
+        type: string
+      rawQuery:
+        type: string
+      rawSchemeSpecificPart:
+        type: string
+      rawUserInfo:
+        type: string
+      scheme:
+        type: string
+      schemeSpecificPart:
+        type: string
+      userInfo:
+        type: string
+    title: URI
+  URL:
+    type: object
+    properties:
+      authority:
+        type: string
+      content:
+        type: object
+      defaultPort:
+        type: integer
+        format: int32
+      file:
+        type: string
+      host:
+        type: string
+      path:
+        type: string
+      port:
+        type: integer
+        format: int32
+      protocol:
+        type: string
+      query:
+        type: string
+      ref:
+        type: string
+      userInfo:
+        type: string
+    title: URL
+  User:
+    type: object
+    properties:
+      apikey:
+        type: string
+      id:
+        type: integer
+        format: int64
+      username:
+        type: string
+    title: User
+  UserDTO:
+    type: object
+    properties:
+      apikey:
+        type: string
+      username:
+        type: string
+    title: UserDTO
