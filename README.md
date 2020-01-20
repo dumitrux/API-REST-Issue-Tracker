@@ -37,4 +37,4 @@ A REST API based on level 2 from the Richardson Maturity Model. Made it in Sprin
 - Conesa Gago, Agustí
 
 Link heroku:
-https://grup13aswd-rest-api-blabla.herokuapp.com/api/swagger-ui.html
+https://grup13aswd-rest-api.herokuapp.com/api/swagger-ui.html
